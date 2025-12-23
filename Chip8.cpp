@@ -1,51 +1,57 @@
 #include "Chip8.h"
 #include <chrono>
 #include <iostream>
+#include <fstream>
+#include <cstdint>
 
 void Chip8::loop(){
-    auto last = std::chrono::steady_clock::now();
-    double timerAccumulator = 0.0;
-    double cpuAccumulator = 0.0;
+    auto lastCpu = std::chrono::steady_clock::now();
+    auto lastClock = std::chrono::steady_clock::now();
     while (true){
         auto now = std::chrono::steady_clock::now();
-        auto timeDifference = std::chrono::duration<double>(now-last).count();
-        last = now;
-        timerAccumulator+= timeDifference;
+        auto cpuDt = std::chrono::duration<double>(now-lastCpu).count();
+        auto clockDt = std::chrono::duration<double>(now-lastClock).count();
 
-        cpuAccumulator += timeDifference * CPU_HZ;
-
-        while (cpuAccumulator >= 1.0){
+        while (cpuDt >= CPU_STEP){
             cycle();
-            cpuAccumulator --;
+            cpuDt -= CPU_STEP;
+            lastCpu += std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(CPU_STEP));
         }
 
-        while (timerAccumulator >= TIMER_STEP){
-            timerAccumulator -= TIMER_STEP;
+        while (clockDt >= TIMER_STEP){
             if (delayTimer > 0){
                 delayTimer --;
             }
 
             if (soundTimer > 0){
                 soundTimer --;
-                //std::cout << "\a";
-                //todo: implement sound
             }
-        }
-        
+
+            clockDt -= TIMER_STEP;
+            lastClock += std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(TIMER_STEP));
+        }        
 
     }
-
-
 }
 
 
 
 u_int16_t Chip8::fetch(){
-    u_int8_t firstByte = memory[pc] << 8;
-    pc ++;
-    u_int8_t secondByte = memory[pc];
-    pc ++;
-    return (firstByte | secondByte);
+    if (pc <= 4094){
+        u_int16_t firstByte = memory[pc] << 8;
+        pc ++;
+        std::cout << "First byte" << int(firstByte) << std::endl;
+        u_int16_t secondByte = memory[pc];
+        std::cout << "Second byte" << int(secondByte) << std::endl;
+        pc ++;
+        std::cout << (firstByte | secondByte) << std::endl;
+        return (firstByte | secondByte);
+    }
+
+
+    std::cerr << "PC out of bounds" << std::endl;
+    exit(1);
+
 }
 
 void Chip8::execute(u_int16_t instruction){
@@ -57,24 +63,37 @@ void Chip8::execute(u_int16_t instruction){
     u_int16_t nnn = (instruction & 0x0FFF); //second, third, fourth, nibbles 
 
 
+
     switch (opcode){
         case 0:
-            clearScreen();
-            break; 
+            if (n == 0){
+                clearScreen();
+                std::cout << "clear screen" << std::endl;
+                break; 
+            }
+
+            else if (n == 0xE){
+                //return from subroutine
+            }
+
         case 1:
             jump(nnn);
+            std::cout << "jump" << std::endl;
             break;
         case 6:
             setRegister(x, nn);
+            std::cout << "set register" << std::endl;
             break;
         case 7:
             add (x, nn);
             break;
         case 0xA:
             setIndexRegister(nnn);
+            std::cout << "Set index register" << std::endl;
             break;
-        case 13:
-            drawDisplay(x, y, n);
+        case 0xD:
+            dxyn(x, y, n);
+            std::cout << "dxyn" << std::endl;
             break;
     }
 }
@@ -104,33 +123,96 @@ void Chip8::setIndexRegister(u_int16_t address){
     iRegister = address;
 }
 
-void Chip8::drawDisplay(u_int8_t xReg, u_int8_t yReg, u_int8_t height){
+void Chip8::dxyn(u_int8_t xReg, u_int8_t yReg, u_int8_t height){
     u_int8_t xCoord = registers[xReg] & (SCREEN_WIDTH-1);
     u_int8_t yCoord = registers[yReg] & (SCREEN_HEIGHT-1);
-    registers[0xF] = 1;
+    registers[0xF] = 0;
 
-    int counter = 0;
-    int currentRow;
-    while (counter < height && yCoord < SCREEN_HEIGHT){
-        currentRow = memory[iRegister + counter];
-        for (int i = 0; i < 8; i ++){
-            if (xCoord + i < SCREEN_WIDTH){
-                display[yCoord][xCoord + i] ^ (currentRow & 0b10000000);
-                if (display[yCoord][xCoord] == 0 && (currentRow & 0b10000000 == 1)){
-                    registers[0xF] = 1;
-                }
-                currentRow = currentRow << 1; 
-            }
-            
-            else{
+    for (u_int8_t row = 0; row < height; row ++){
+        u_int16_t spriteAddress = iRegister + row;
+        u_int8_t y = yCoord + row;
+        if (spriteAddress > 0xFFF){
+            break;
+        }
+
+        if (y >= SCREEN_HEIGHT){
+            break;
+        }
+
+        u_int8_t spriteByte = memory[spriteAddress];
+
+        for (u_int8_t bit = 0; bit < 8; bit ++){
+            u_int8_t x = xCoord + bit;
+            if (x >= SCREEN_WIDTH){
                 break;
             }
+
+            u_int8_t spritePixel = (spriteByte & (0x80 >> bit)) != 0;
+            if (display[y][x] == 1 && (spritePixel)){
+                registers[0xF] = 1;
+            }
+            display[y][x] = display[y][x] ^ spritePixel;
         }
     }
 
+
+
+    drawScreen();
+}
+
+void Chip8::cycle(){
+    u_int16_t instruction = fetch();
+    execute(instruction);
 }
 
 
+//Chat GPT 
+bool Chip8::loadROM(const std::string& path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file) {
+        std::cerr << "Failed to open ROM: " << path << "\n";
+        return false;
+    }
+
+    std::streamsize size = file.tellg();
+    if (size <= 0) {
+        std::cerr << "ROM file is empty.\n";
+        return false;
+    }
+
+    file.seekg(0, std::ios::beg);
+
+    std::vector<uint8_t> rom(static_cast<size_t>(size));
+    if (!file.read(reinterpret_cast<char*>(rom.data()), size)) {
+        std::cerr << "Failed to read ROM bytes.\n";
+        return false;
+    }
+
+    if (PROGRAM_START + rom.size() > MEMORY_SIZE) {
+        std::cerr << "ROM too large to fit in memory.\n";
+        return false;
+    }
+
+    for (size_t i = 0; i < rom.size(); i++) {
+        memory[PROGRAM_START + i] = rom[i];
+    }
+
+    std::cout << "Program loaded succesfully" << std::endl;
+
+    return true;
+}
 
 
-
+void Chip8::drawScreen(){
+    for (int i = 0; i < SCREEN_HEIGHT; i ++){
+        for (int j = 0; j < SCREEN_WIDTH; j ++){
+            if (display[i][j] == 0){
+                std::cout << ".";
+            }
+            else{
+                std::cout << "#";
+            }
+        }
+        std::cout << std::endl;
+    }
+}

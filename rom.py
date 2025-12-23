@@ -1,0 +1,43 @@
+def create_rom():
+    rom = bytes([
+        0x00,0xE0,
+        0x60,0x00,
+        0x61,0x00,
+        0xA3,0x00,
+        0xD0,0x11,
+        0x12,0x0A,
+    ])
+
+
+    rom = bytes([
+        0x00, 0xE0,        # CLS
+
+        0x60, 0x00,        # V0 = 0   (x)
+        0x61, 0x00,        # V1 = 0   (y)
+
+        0xA0, 0x8C,        # I = font('C')
+        0xD0, 0x15,        # draw C
+
+        0x60, 0x06,        # V0 = 6   (next x)
+        0xA0, 0x50,        # I = font('0')
+        0xD0, 0x15,        # draw 0
+
+        0x60, 0x0C, 
+        0xA0, 0x91,
+        0xD0, 0x15,
+
+        0x60, 0x12,
+        0xA0, 0x96,
+        0xD0, 0x15,
+
+    ])
+
+    with open("draw_test.ch8","wb") as f:
+        f.write(rom)
+
+
+def main():
+    create_rom()
+
+if __name__ == "__main__":
+    main()
