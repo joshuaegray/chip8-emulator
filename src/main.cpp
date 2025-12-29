@@ -1,4 +1,4 @@
-#include "Chip8.h"
+#include "chip8.hpp"
 #include <iostream>
 
 int main(int argc, char* argv[]){
@@ -10,7 +10,7 @@ int main(int argc, char* argv[]){
     Chip8 myEmulator;
     myEmulator.loadROM(argv[1]);
 
-    for (int i = 0; i < 11; i ++){
+    for (int i = 0; i < 14; i ++){
         myEmulator.cycle();
     }
 

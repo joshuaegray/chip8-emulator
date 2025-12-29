@@ -1,13 +1,41 @@
-CXX = g++ -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
+# --- Variables ---
+CXX      := g++
+CXXFLAGS := -std=c++17 -g -Wall -Wextra -Werror -Wno-unused-parameter
+CPPFLAGS := -Isrc/chip8 -Isrc/platform # Tells compiler where to find headers
 
-emulate: Chip8.o main.o Chip8.h 
-	${CXX} Chip8.o main.o -o emulate
+# List all source files
+SRC := src/main.cpp \
+       src/chip8/chip8.cpp \
+       src/chip8/cpu.cpp \
+       src/chip8/memory.cpp \
+       src/chip8/timers.cpp \
+       src/platform/display.cpp
 
-Chip8.o: Chip8.cpp Chip8.h
-	${CXX} Chip8.cpp -c
+# Transform src/path/file.cpp -> file.o
+OBJS := $(notdir $(SRC:.cpp=.o))
+# Transform file.o -> file.d (dependency files)
+DEPS := $(OBJS:.o=.d)
 
-main.o: main.cpp
-	${CXX} main.cpp -c
+# VPATH tells Make where to search for the source files listed in OBJS
+VPATH := src:src/chip8:src/platform
+
+# --- Targets ---
+
+.PHONY: all clean
+
+all: emulate
+
+# The final executable
+emulate: $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+# Pattern rule for object files
+# Includes flags to generate .d files automatically
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -MMD -MP -c $< -o $@
+
+# Include the generated dependency files
+-include $(DEPS)
 
 clean:
-	rm -f *.o emulate
+	rm -f *.o *.d emulate
