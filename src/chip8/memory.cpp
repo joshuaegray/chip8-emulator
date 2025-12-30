@@ -43,6 +43,8 @@ Memory::Memory() {
   for (int i = 0; i < 80; i++) {
     memory[chip8::FONT_START + i] = chip8::FONTS[i];
   }
+
+  
 }
 
 void Memory::writeMemory(uint16_t address, uint8_t value){

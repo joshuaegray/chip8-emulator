@@ -10,7 +10,8 @@ int main(int argc, char* argv[]){
     Chip8 myEmulator;
     myEmulator.loadROM(argv[1]);
 
-    for (int i = 0; i < 15; i ++){
+    int cyclesToRun = 50;
+    for (int i = 0; i < cyclesToRun; i ++){
         myEmulator.cycle();
     }
 

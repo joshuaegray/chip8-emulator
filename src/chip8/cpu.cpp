@@ -375,7 +375,7 @@ void CPU::shiftRight(uint8_t xReg, uint8_t yReg, Memory& memory){
 
 
 void CPU::shiftLeft(uint8_t xReg, uint8_t yReg, Memory& memory){
-    memory.setRegister(0XF, memory.getRegister(xReg) & 0X8);
+    memory.setRegister(0XF, (memory.getRegister(xReg) & 0X80) >> 7);
     memory.setRegister(xReg, memory.getRegister(xReg) << 1);
 }
 

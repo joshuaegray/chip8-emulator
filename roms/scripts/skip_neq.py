@@ -40,7 +40,7 @@ def create_rom():
     out_dir = Path(__file__).resolve().parent / "../binaries"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    out_path = out_dir / "test.ch8"
+    out_path = out_dir / "skip_neq.ch8"
     with open(out_path, "wb") as f:
         f.write(rom)
 

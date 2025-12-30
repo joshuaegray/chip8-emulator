@@ -1,6 +1,7 @@
 #include "display.hpp"
 #include <iostream>
 void Display::drawScreen(){
+    std::cout << "----------------------------" << std::endl;
     for (int i = 0; i < chip8::SCREEN_HEIGHT; i ++){
         for (int j = 0; j < chip8::SCREEN_WIDTH; j ++){
             if (display[i][j] == 0){

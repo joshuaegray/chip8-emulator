@@ -1,3 +1,5 @@
+#Simple test case to draw a zero to the screen
+
 from pathlib import Path
 
 def create_rom():
@@ -14,7 +16,7 @@ def create_rom():
     out_dir = Path(__file__).resolve().parent / "../binaries"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    out_path = out_dir / "test.ch8"
+    out_path = out_dir / "zero.ch8"
     with open(out_path, "wb") as f:
         f.write(rom)
 
