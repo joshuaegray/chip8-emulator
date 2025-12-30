@@ -1,4 +1,5 @@
 #include "memory.hpp"
+#include "constants.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -45,23 +46,57 @@ Memory::Memory() {
 }
 
 void Memory::writeMemory(uint16_t address, uint8_t value){
-  memory[address] = value;
+  if (address >= 0 && address < chip8::MEMORY_SIZE){
+    memory[address] = value;
+  }
+
+  else{
+    std::cerr << "Write Memory Error: Memory out of bounds" << std::endl;
+    exit(1);
+  }
 }
 
 uint8_t Memory::readMemory(uint16_t address) const{
-  return memory[address];
+  if (address >= 0 && address < chip8::MEMORY_SIZE){
+    return memory[address];
+  }
+
+  else{
+    std::cerr << "Read Memory Error: Memory out of bounds" << std::endl;
+    exit(1);
+  }
 }
 
-void Memory::setRegister(uint16_t reg, uint8_t value){
-  registers[reg] = value;
+void Memory::setRegister(uint8_t reg, uint8_t value){
+  if (reg >= 0 && reg <= 15){
+    registers[reg] = value;
+  }
+
+  else{
+    std::cerr << "Set Register Memory: Register out of bounds" << std::endl;
+    exit(1);
+  }
 }
 
-uint8_t Memory::getRegister(uint16_t reg) const{
-  return registers[reg];
+uint8_t Memory::getRegister(uint8_t reg) const{
+  if (reg >= 0 && reg <= 15){
+    return registers[reg];
+  }
+  else{
+    std::cerr << "Get Register memory: Register out of bounds" << std::endl;
+    exit(1);
+  }
 }
 
 void Memory::setIndexRegister(uint16_t value){
-  iRegister = value;
+  if (value >= 0 && value < chip8::MEMORY_SIZE){
+    iRegister = value;
+  }
+
+  else{
+    std::cerr << "Set Index Register Error: Address out of bounds" << std::endl;
+    exit(1);
+  }
 }
 
 uint16_t Memory::getIndexRegister(){
@@ -69,10 +104,18 @@ uint16_t Memory::getIndexRegister(){
 }
 
 void Memory::pushToStack(uint16_t address){
+  if (stack.size() == 16){
+    std::cerr << "Error: Stack size is too large" << std::endl;
+    exit(1);
+  }
   stack.push(address);
 }
 
 uint16_t Memory::top(){
+  if (stack.empty()){
+    std::cerr << "Error: Cannot pop from empty stack" << std::endl;
+    exit(1);
+  }
   uint16_t returnValue = stack.top();
   stack.pop();
   return returnValue;

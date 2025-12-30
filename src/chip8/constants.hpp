@@ -3,9 +3,12 @@
 #include <cstdint>
 
 namespace chip8{
+
   static constexpr uint16_t MEMORY_SIZE = 4096;
   static constexpr uint8_t FONT_START = 0x050;
   static constexpr uint16_t PROGRAM_START = 0x200;
+
+  static_assert(chip8::FONT_START + 80 <= chip8::MEMORY_SIZE);
 
   static constexpr int CPU_HZ = 700;
   static constexpr double CPU_STEP = 1.0/CPU_HZ;

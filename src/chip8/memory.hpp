@@ -13,8 +13,8 @@ public:
   Memory();
   void writeMemory(uint16_t address, uint8_t value);
   uint8_t readMemory(uint16_t address) const;
-  void setRegister(uint16_t reg, uint8_t value);
-  uint8_t getRegister(uint16_t reg) const;
+  void setRegister(uint8_t reg, uint8_t value);
+  uint8_t getRegister(uint8_t reg) const;
   void setIndexRegister(uint16_t value);
   uint16_t getIndexRegister();
   bool loadROM(const std::string &path);
