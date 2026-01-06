@@ -13,4 +13,6 @@ public:
   uint8_t getSoundTimer();
   void decrementDelayTimer();
   void decrementSoundTimer();
+  void setDelayTimer(uint8_t value);
+  void setSoundTimer(uint8_t value);
 };

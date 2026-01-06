@@ -1,5 +1,5 @@
 # Created by Gemini
-# Test AND, OR, XOR, and SHIFTS
+# Test OR, XOR, and SHIFTS
 # Pass: 0
 #Fail: 1
 from pathlib import Path

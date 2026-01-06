@@ -9,7 +9,9 @@ SRC := src/main.cpp \
        src/chip8/cpu.cpp \
        src/chip8/memory.cpp \
        src/chip8/timers.cpp \
-       src/platform/display.cpp
+       src/chip8/display.cpp \
+       src/chip8/keypad.cpp \
+       src/chip8/timers.cpp
 
 # Transform src/path/file.cpp -> file.o
 OBJS := $(notdir $(SRC:.cpp=.o))

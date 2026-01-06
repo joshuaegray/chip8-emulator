@@ -1,21 +1,22 @@
 #pragma once
-#include "../platform/display.hpp"
+#include "display.hpp"
 #include "constants.hpp"
 #include "memory.hpp"
 #include "timers.hpp"
+#include "keypad.hpp"
 
 class CPU {
 
 public:
-  void cycle(Memory &memory, Display &display);
+  void cycle(Memory &memory, Display &display, Keypad& keypad, Timer& timer);
   CPU();
 
 private:
   uint16_t pc;
-  void loop(Timer &timers, Memory &memory, Display &display);
-  uint16_t fetch(Memory &memory);
+  void loop(Timer& timer, Memory& memory, Display& display, Keypad& keypad);
+  uint16_t fetch(Memory& memory);
   void decode();
-  void execute(uint16_t instruction, Display &display, Memory &memory);
+  void execute(uint16_t instruction, Display& display, Memory& memory, Keypad& keypad, Timer& timer);
 
   // opcode instructions
   void clearScreen(Display &display); //00E0
@@ -50,6 +51,31 @@ private:
   //Note: My implementation ignores the yReg
   void shiftRight(uint8_t xReg, uint8_t yReg, Memory& memory); //8XY6
   void shiftLeft(uint8_t xReg, uint8_t yReg, Memory& memory); //8XYE
+
+  //untested
+  void jumpWithOffset(uint16_t address, Memory& memory); //BNNN (pc = NNN + V0)
+  void random(uint8_t reg, uint8_t nn, Memory& memory); //CXNN
+
+  void skipIfPressed(uint8_t reg, Keypad& keypad, Memory& memory); //EX9E
+  void skipIfNotPressed(uint8_t reg, Keypad& keypad, Memory& memory); //EXA1
+
+  void getDelayTimer(uint8_t reg, Timer& timer, Memory& memory) const; //FX07
+  void setDelayTimer(uint8_t reg, Timer& timer, Memory& memory) const; //FX15
+  void setSoundTimer(uint8_t reg, Timer& timer, Memory& memory) const; //FX18
+
+  void addToIndex(uint8_t reg, Memory& memory) const; //FX1E
+
+  void getKey(Keypad& keypad); //FX0A
+
+  void fontCharacter(uint8_t reg, Memory& memory); //FX29
+
+  void binaryToDecimal(uint8_t reg, Memory& memory); //FX33
+
+  void loadMemory(uint8_t reg, Memory& memory); //FX55
+
+  void storeMemory(uint8_t reg, Memory& memory); //FX65
+
+
 
 
 

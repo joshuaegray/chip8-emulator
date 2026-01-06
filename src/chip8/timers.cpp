@@ -20,3 +20,12 @@ void Timer::decrementDelayTimer(){
 void Timer::decrementSoundTimer(){
     soundTimer -= 1;
 }
+
+void Timer::setDelayTimer(uint8_t value){
+    delayTimer = value;
+
+}
+
+void Timer::setSoundTimer(uint8_t value){
+    soundTimer = value;
+}

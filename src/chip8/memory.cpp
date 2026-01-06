@@ -40,9 +40,16 @@ bool Memory::loadROM(const std::string &path) {
 }
 
 Memory::Memory() {
+
+  for (int i = 0; i < chip8::MEMORY_SIZE; i ++){
+    memory[i] = 0;
+  }
+
+
   for (int i = 0; i < 80; i++) {
     memory[chip8::FONT_START + i] = chip8::FONTS[i];
   }
+
 
   
 }

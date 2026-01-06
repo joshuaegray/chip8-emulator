@@ -1,7 +1,9 @@
 #include <iostream>
+#include <random>
 #include "memory.hpp"
 #include "cpu.hpp"
 #include "constants.hpp"
+#include "keypad.hpp"
 
 CPU::CPU(){
     pc = chip8::PROGRAM_START;
@@ -22,7 +24,7 @@ uint16_t CPU::fetch(Memory& memory){
 }
 
 
-void CPU::loop(Timer& timers, Memory& memory, Display& display){
+void CPU::loop(Timer& timer, Memory& memory, Display& display, Keypad& keypad){
     auto lastCpu = std::chrono::steady_clock::now();
     auto lastClock = std::chrono::steady_clock::now();
     while (true){
@@ -31,18 +33,18 @@ void CPU::loop(Timer& timers, Memory& memory, Display& display){
         auto clockDt = std::chrono::duration<double>(now-lastClock).count();
 
         while (cpuDt >= chip8::CPU_STEP){
-            cycle(memory, display);
+            cycle(memory, display, keypad, timer);
             cpuDt -= chip8::CPU_STEP;
             lastCpu += std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(chip8::CPU_STEP));
         }
 
         while (clockDt >= chip8::TIMER_STEP){
-            if (timers.getDelayTimer() > 0){
-                timers.decrementDelayTimer(); 
+            if (timer.getDelayTimer() > 0){
+                timer.decrementDelayTimer(); 
             }
 
-            if (timers.getSoundTimer() > 0){
-                timers.decrementSoundTimer();
+            if (timer.getSoundTimer() > 0){
+                timer.decrementSoundTimer();
             }
 
             clockDt -= chip8::TIMER_STEP;
@@ -55,7 +57,7 @@ void CPU::loop(Timer& timers, Memory& memory, Display& display){
 
 
 
-void CPU::execute(u_int16_t instruction, Display& display, Memory& memory){
+void CPU::execute(u_int16_t instruction, Display& display, Memory& memory, Keypad& keypad, Timer& timer){
     u_int8_t opcode = (instruction & 0xF000) >> 12; //first nibble
     u_int8_t x = (instruction & 0x0F00) >> 8; //second nibble
     u_int8_t y = (instruction & 0x00F0) >> 4; //third nibble
@@ -143,7 +145,7 @@ void CPU::execute(u_int16_t instruction, Display& display, Memory& memory){
                 shiftLeft(x,y,memory);
                 break;
             }
-        break;
+            break;
 
         case 9:
             skipIfRegNotEqual(x, y, memory);
@@ -151,8 +153,75 @@ void CPU::execute(u_int16_t instruction, Display& display, Memory& memory){
         case 0xA:
             setIndexRegister(nnn, memory);
             break;
+        case 0xB:
+            jumpWithOffset(nnn, memory);
+            break;
+        case 0xC:
+            random(x, nn, memory);
+            break;
         case 0xD:
             dxyn(x, y, n, memory, display);
+            break;
+        case 0xE:
+            if (nn == 0x9E){
+                skipIfPressed(x, keypad, memory);
+                break;
+            }
+
+            else if (nn == 0xA1){
+                skipIfNotPressed(x, keypad, memory);
+                break;
+            }
+            break;
+        case 0xF:
+            if (nn == 0x07){
+                getDelayTimer(x, timer, memory);
+                break;
+            }
+
+            else if (nn == 0x15){
+                setDelayTimer(x, timer, memory);
+                break;
+            }
+
+            else if (nn == 0x18){
+                setSoundTimer(x, timer, memory);
+            }
+
+            else if (nn == 0x0A){
+                getKey(keypad);
+                break;
+            }
+
+            else if (nn == 0x29){
+                fontCharacter(x, memory);
+                break;
+            }
+
+            else if (nn == 0x33){
+                binaryToDecimal(x, memory);
+                break;
+            }
+
+            else if (nn == 0x55){
+                storeMemory(x, memory);
+                break;
+            }
+
+            else if (nn == 0x65){
+                loadMemory(x, memory);
+                break;
+            }
+
+            else if (nn == 0x1E){
+                addToIndex(x, memory);
+                break;
+            }
+
+            break;
+        default:
+            std::cerr << "ERROR: NO INSTRUCTION MATCHING THE OPCODE" << std::endl;
+            exit(1);
             break;
     }
 }
@@ -244,9 +313,12 @@ void CPU::dxyn(u_int8_t xReg, u_int8_t yReg, u_int8_t height, Memory& memory, Di
     display.drawScreen();
 }
 
-void CPU::cycle(Memory& memory, Display& display){
+void CPU::cycle(Memory& memory, Display& display, Keypad& keypad, Timer& timer){
     u_int16_t instruction = fetch(memory);
-    execute(instruction, display, memory);
+
+
+
+    execute(instruction, display, memory, keypad, timer);
 }
 
 void CPU::startSubroutine(uint16_t address, Memory& memory){
@@ -377,5 +449,118 @@ void CPU::shiftRight(uint8_t xReg, uint8_t yReg, Memory& memory){
 void CPU::shiftLeft(uint8_t xReg, uint8_t yReg, Memory& memory){
     memory.setRegister(0XF, (memory.getRegister(xReg) & 0X80) >> 7);
     memory.setRegister(xReg, memory.getRegister(xReg) << 1);
+}
+
+//untested after this point
+void CPU::jumpWithOffset(uint16_t address, Memory& memory){
+    if (address < chip8::MEMORY_SIZE - memory.getRegister(0)){
+        pc = address + memory.getRegister(0);
+    }
+
+    else{
+        std::cerr << "Error: PC out of range" << std::endl;
+        exit(1);
+    }
+
+}
+
+void CPU::random(uint8_t reg, uint8_t nn, Memory& memory){
+    std::random_device r;
+    std::mt19937 engine(r());
+    std::uniform_int_distribution<uint8_t> dist(0,255);
+
+    uint8_t randomNumber = dist(engine);
+    memory.setRegister(reg, randomNumber & nn);
+}
+
+void CPU::skipIfPressed(uint8_t reg, Keypad& keypad, Memory& memory) {
+    if (keypad.isPressed(reg)){
+        if (pc >= chip8::MEMORY_SIZE-2){
+            std::cerr << "Error: PC out of range, cannot skip" << std::endl;
+            exit(1);
+        }
+
+        else{
+            pc += 2;
+        }
+    }
+}
+
+
+void CPU::skipIfNotPressed(uint8_t reg, Keypad& keypad, Memory& memory){
+    if (!keypad.isPressed(reg)){
+        if (pc >= chip8::MEMORY_SIZE-2){
+            std::cerr << "Error: PC out of range, cannot skip" << std::endl;
+            exit(1);
+        }
+
+        else{
+            pc += 2;
+        }
+    } 
+}
+
+void CPU::getDelayTimer(uint8_t reg, Timer& timer, Memory& memory) const{
+    memory.setRegister(reg, timer.getDelayTimer());
+}
+
+void CPU::setDelayTimer(uint8_t reg, Timer& timer, Memory& memory) const{
+    timer.setDelayTimer(memory.getRegister(reg));
+}
+
+void CPU::setSoundTimer(uint8_t reg, Timer& timer, Memory& memory) const{
+    timer.setSoundTimer(memory.getRegister(reg));
+}
+
+void CPU::addToIndex(uint8_t reg, Memory& memory) const{
+    if (memory.getIndexRegister() >= 0xFFFF-memory.getRegister(reg)){
+        std::cerr << "Error: Cannot add to index register, out of range" << std::endl;
+        exit(1);
+    }
+
+    else{
+        memory.setIndexRegister(memory.getIndexRegister() + memory.getRegister(reg));
+    }
+}
+
+void CPU::getKey(Keypad& keypad){
+    if (!keypad.anyKeyPressed()){
+        pc --;
+    }
+}
+
+void CPU::fontCharacter(uint8_t reg, Memory& memory){
+    uint8_t character = memory.getRegister(reg);
+    std::cout << "FONT CHARACTER: " <<  int(character) << std::endl;
+    memory.setIndexRegister(chip8::FONT_START + (5 * character));
+}
+
+void CPU::binaryToDecimal(uint8_t reg, Memory& memory){
+    //Extract the three decimal digits
+    uint8_t num = memory.getRegister(reg);
+    uint8_t firstDigit = num%10;
+    num /= 10;
+    uint8_t secondDigit = num%10;
+    num /= 10;
+    uint8_t thirdDigit = num;
+
+    uint16_t address = memory.getIndexRegister();
+
+    memory.writeMemory(address, thirdDigit);
+    memory.writeMemory(address+1, secondDigit);
+    memory.writeMemory(address+2, firstDigit);
+}
+
+void CPU::storeMemory(uint8_t reg, Memory& memory){
+    for (uint8_t i = 0; i <= reg; i ++){
+        memory.writeMemory(memory.getIndexRegister()+i, memory.getRegister(i));
+    }
+}
+
+void CPU::loadMemory(uint8_t reg, Memory& memory){
+    for (uint8_t i = 0; i <= reg; i ++){
+        memory.setRegister(i, memory.readMemory(memory.getIndexRegister()+i));
+        std::cout << "FOUND VALUE: " << std::hex << (int)(memory.getIndexRegister()+i) << std::endl;
+    }
 }
 
