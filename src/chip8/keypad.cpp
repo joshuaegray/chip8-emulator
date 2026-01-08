@@ -1,7 +1,9 @@
 #include "keypad.hpp"
+#include <iostream>
 
 void Keypad::setKey(uint8_t key, bool pressed){
-    keys[key] = true;
+    std::cout << int(key) << std::endl;
+    keys[key] = pressed;
 }
 
 bool Keypad::isPressed(uint8_t key) const{
@@ -16,5 +18,20 @@ bool Keypad::anyKeyPressed() const{
     }
 
     return false;
+}
+
+uint8_t Keypad::getKeyPressed() const{
+    for (int i = 0; i < 16; i ++){
+        if (keys[i]){
+            return i;
+        }
+    }
+    return 0xFF;
+}
+
+Keypad::Keypad(){
+    for (int i = 0; i < 16; i ++){
+        keys[i] = 0;
+    }
 }
 

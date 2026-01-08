@@ -17,6 +17,9 @@ public:
   Chip8();
   void loadROM(const std::string &path);
   void cycle();
+  const Display& getDisplay() const;
+  Keypad& getKeypad();
+  bool updateTimers();
 
   // Instructions
 };

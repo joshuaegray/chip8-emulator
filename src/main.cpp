@@ -1,4 +1,5 @@
 #include "chip8.hpp"
+#include "platform.hpp"
 #include <iostream>
 
 int main(int argc, char* argv[]){
@@ -8,12 +9,10 @@ int main(int argc, char* argv[]){
     }
 
     Chip8 myEmulator;
+    SdlPlatform platform(640, 320);
     myEmulator.loadROM(argv[1]);
 
-    int cyclesToRun = 200;
-    for (int i = 0; i < cyclesToRun; i ++){
-        myEmulator.cycle();
-    }
+    platform.run(myEmulator);
 
     return 0;
 }

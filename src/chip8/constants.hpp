@@ -19,6 +19,12 @@ namespace chip8{
   static constexpr int SCREEN_WIDTH = 64;
   static constexpr int SCREEN_HEIGHT = 32;
 
+  static constexpr int TARGET_FPS = 60;
+  static constexpr int FRAME_DELAY = 1000 / TARGET_FPS;
+
+  static constexpr int CYCLES_PER_FRAME = CPU_HZ / TARGET_FPS;
+  static constexpr int TIMERS_PER_FRAME = TIMER_HZ / TARGET_FPS;
+
 static constexpr uint8_t FONTS[80] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, //0
     0x20, 0x60, 0x20, 0x20, 0x70, //1

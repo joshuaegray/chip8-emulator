@@ -65,7 +65,7 @@ private:
 
   void addToIndex(uint8_t reg, Memory& memory) const; //FX1E
 
-  void getKey(Keypad& keypad); //FX0A
+  void getKey(uint8_t reg, Keypad& keypad, Memory& memory); //FX0A
 
   void fontCharacter(uint8_t reg, Memory& memory); //FX29
 

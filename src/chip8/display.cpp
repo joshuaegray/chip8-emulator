@@ -27,7 +27,7 @@ void Display::turnPixelOff(uint8_t y, uint8_t x){
     display[y][x] = 0;
 }
 
-int Display::getPixel(uint8_t y, uint8_t x){
+int Display::getPixel(uint8_t y, uint8_t x) const{
     return display[y][x];
 }
 

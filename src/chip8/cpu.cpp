@@ -189,7 +189,7 @@ void CPU::execute(u_int16_t instruction, Display& display, Memory& memory, Keypa
             }
 
             else if (nn == 0x0A){
-                getKey(keypad);
+                getKey(x, keypad, memory);
                 break;
             }
 
@@ -310,7 +310,8 @@ void CPU::dxyn(u_int8_t xReg, u_int8_t yReg, u_int8_t height, Memory& memory, Di
 
 
 
-    display.drawScreen();
+    //use SDL layer instead of terminal
+    //display.drawScreen();
 }
 
 void CPU::cycle(Memory& memory, Display& display, Keypad& keypad, Timer& timer){
@@ -451,7 +452,6 @@ void CPU::shiftLeft(uint8_t xReg, uint8_t yReg, Memory& memory){
     memory.setRegister(xReg, memory.getRegister(xReg) << 1);
 }
 
-//untested after this point
 void CPU::jumpWithOffset(uint16_t address, Memory& memory){
     if (address < chip8::MEMORY_SIZE - memory.getRegister(0)){
         pc = address + memory.getRegister(0);
@@ -464,7 +464,7 @@ void CPU::jumpWithOffset(uint16_t address, Memory& memory){
 
 }
 
-void CPU::random(uint8_t reg, uint8_t nn, Memory& memory){
+void CPU::random(uint8_t reg, uint8_t nn, Memory& memory){ //untested
     std::random_device r;
     std::mt19937 engine(r());
     std::uniform_int_distribution<uint8_t> dist(0,255);
@@ -473,8 +473,8 @@ void CPU::random(uint8_t reg, uint8_t nn, Memory& memory){
     memory.setRegister(reg, randomNumber & nn);
 }
 
-void CPU::skipIfPressed(uint8_t reg, Keypad& keypad, Memory& memory) {
-    if (keypad.isPressed(reg)){
+void CPU::skipIfPressed(uint8_t reg, Keypad& keypad, Memory& memory) { //untested
+    if (keypad.isPressed(memory.getRegister(reg))){
         if (pc >= chip8::MEMORY_SIZE-2){
             std::cerr << "Error: PC out of range, cannot skip" << std::endl;
             exit(1);
@@ -487,8 +487,8 @@ void CPU::skipIfPressed(uint8_t reg, Keypad& keypad, Memory& memory) {
 }
 
 
-void CPU::skipIfNotPressed(uint8_t reg, Keypad& keypad, Memory& memory){
-    if (!keypad.isPressed(reg)){
+void CPU::skipIfNotPressed(uint8_t reg, Keypad& keypad, Memory& memory){ //untested
+    if (!keypad.isPressed(memory.getRegister(reg))){
         if (pc >= chip8::MEMORY_SIZE-2){
             std::cerr << "Error: PC out of range, cannot skip" << std::endl;
             exit(1);
@@ -500,15 +500,15 @@ void CPU::skipIfNotPressed(uint8_t reg, Keypad& keypad, Memory& memory){
     } 
 }
 
-void CPU::getDelayTimer(uint8_t reg, Timer& timer, Memory& memory) const{
+void CPU::getDelayTimer(uint8_t reg, Timer& timer, Memory& memory) const{ //untested
     memory.setRegister(reg, timer.getDelayTimer());
 }
 
-void CPU::setDelayTimer(uint8_t reg, Timer& timer, Memory& memory) const{
+void CPU::setDelayTimer(uint8_t reg, Timer& timer, Memory& memory) const{ //untested
     timer.setDelayTimer(memory.getRegister(reg));
 }
 
-void CPU::setSoundTimer(uint8_t reg, Timer& timer, Memory& memory) const{
+void CPU::setSoundTimer(uint8_t reg, Timer& timer, Memory& memory) const{ //untested
     timer.setSoundTimer(memory.getRegister(reg));
 }
 
@@ -523,10 +523,16 @@ void CPU::addToIndex(uint8_t reg, Memory& memory) const{
     }
 }
 
-void CPU::getKey(Keypad& keypad){
-    if (!keypad.anyKeyPressed()){
-        pc --;
+void CPU::getKey(uint8_t reg, Keypad& keypad, Memory& memory){
+    uint8_t key = keypad.getKeyPressed();
+    if (key == 0xFF){
+        pc -= 2;
     }
+    else{
+        memory.setRegister(reg, key);
+        std::cout << memory.getRegister(reg) << std::endl;
+    }
+
 }
 
 void CPU::fontCharacter(uint8_t reg, Memory& memory){
