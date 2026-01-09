@@ -79,7 +79,7 @@ As a platform layer between the CHIP-8 CPU and the OS, the program uses the SDL2
 
 ---
 
-### Keypad
+## Keypad
 
 The emulator implements a virtual CHIP-8 keyboard that is mapped to a standard QWERTY Keyboard
 
