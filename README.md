@@ -4,6 +4,21 @@
 
 This is my implementation of the legendary processor, written in C++
 
+---
+
+## Table of Contents
+
+- [Architecture Overview](#architecture-overview)
+- [Features](#features)
+- [Demos](#demos)
+- [Usage](#usage)
+- [Keypad](#keypad)
+- [Binary ROMs and Testing](#binary-roms-and-testing)
+- [File Structure](#file-structure)
+- [Motivation](#motivation)
+
+---
+
 ## Architecture Overview
 
 The CHIP-8 system consists of
@@ -146,6 +161,4 @@ CHIP-8 provided an ideal platform for exploring instruction decoding, timing mod
 
 Beyond architecture, this project significantly improved my systems programming skills in C++, as well as my debugging discipline and attention to detail, preparing me to develop reliable low-level software.
 
-> *By wisdom a house is built, 
-> and through understanding it is established.*
-> - Proverbs 24:3
+> *By wisdom a house is built, and through understanding it is established.* \- Proverbs 24:3
