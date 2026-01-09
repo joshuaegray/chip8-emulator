@@ -3,18 +3,17 @@
 #include <fstream>
 #include <iostream>
 
-// Chat GPT
-bool Memory::loadROM(const std::string &path) {
+void Memory::loadROM(const std::string &path) {
   std::ifstream file(path, std::ios::binary | std::ios::ate);
   if (!file) {
     std::cerr << "Failed to open ROM: " << path << "\n";
-    return false;
+    exit(1);
   }
 
   std::streamsize size = file.tellg();
   if (size <= 0) {
     std::cerr << "ROM file is empty.\n";
-    return false;
+    exit(1);
   }
 
   file.seekg(0, std::ios::beg);
@@ -22,12 +21,12 @@ bool Memory::loadROM(const std::string &path) {
   std::vector<uint8_t> rom(static_cast<size_t>(size));
   if (!file.read(reinterpret_cast<char *>(rom.data()), size)) {
     std::cerr << "Failed to read ROM bytes.\n";
-    return false;
+    exit(1);
   }
 
   if (chip8::PROGRAM_START + rom.size() > chip8::MEMORY_SIZE) {
     std::cerr << "ROM too large to fit in memory.\n";
-    return false;
+    exit(1);
   }
 
   for (size_t i = 0; i < rom.size(); i++) {
@@ -36,7 +35,6 @@ bool Memory::loadROM(const std::string &path) {
 
   std::cout << "Program loaded succesfully" << std::endl;
 
-  return true;
 }
 
 Memory::Memory() {

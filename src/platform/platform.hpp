@@ -12,11 +12,7 @@ public:
     void run(Chip8& chip8);
 
 private:
-    //void initSDL();
-    //void pollInput(Keypad& keypad); not implemented yet
-    //void updateTiming(Chip8& chip8);
     void render(const Display& display);
-    //void cleanup();
 
 private:
     bool quit = false;
@@ -29,9 +25,4 @@ private:
 
     void processInput(Keypad& keypad);
     void updateSound(bool shouldPlay);
-
-    // Timing
-    //uint64_t lastTime = 0;
-    //double cpuAccumulator = 0.0;
-    //double timerAccumulator = 0.0;
 };

@@ -1,3 +1,4 @@
+#Written by Gemini
 # Fixed Cleanup Test (Addresses Verified)
 # Tests: 7XNN, 8XY7, 8XY2, 8XY3, 5XY0, 9XY0
 
@@ -80,7 +81,7 @@ def create_rom():
 
     out_dir = Path(__file__).resolve().parent / "../binaries"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "test_cleanup.ch8"
+    out_path = out_dir / "cleanup.ch8"
     with open(out_path, "wb") as f:
         f.write(rom)
     print(f"Wrote ROM to {out_path}")

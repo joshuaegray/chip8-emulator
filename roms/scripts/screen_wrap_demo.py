@@ -1,3 +1,5 @@
+#Written by Gemini
+#Sends F flying across the screen, wrapping when it goes out of bounds
 from pathlib import Path
 
 def create_rom():
@@ -59,11 +61,11 @@ def create_rom():
 
     out_dir = Path(__file__).resolve().parent / "../binaries"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "demo_screen_wrap.ch8"
+    out_path = out_dir / "screen_wrap_demo.ch8"
     
     with open(out_path, "wb") as f:
         f.write(rom)
-    print(f"Created demo_screen_wrap.ch8")
+    print(f"Created screen_wrap_demo.ch8")
 
 if __name__ == "__main__":
     create_rom()

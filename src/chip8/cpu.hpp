@@ -13,9 +13,7 @@ public:
 
 private:
   uint16_t pc;
-  void loop(Timer& timer, Memory& memory, Display& display, Keypad& keypad);
   uint16_t fetch(Memory& memory);
-  void decode();
   void execute(uint16_t instruction, Display& display, Memory& memory, Keypad& keypad, Timer& timer);
 
   // opcode instructions
@@ -52,7 +50,6 @@ private:
   void shiftRight(uint8_t xReg, uint8_t yReg, Memory& memory); //8XY6
   void shiftLeft(uint8_t xReg, uint8_t yReg, Memory& memory); //8XYE
 
-  //untested
   void jumpWithOffset(uint16_t address, Memory& memory); //BNNN (pc = NNN + V0)
   void random(uint8_t reg, uint8_t nn, Memory& memory); //CXNN
 

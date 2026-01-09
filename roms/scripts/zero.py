@@ -1,4 +1,5 @@
 #Simple test case to draw a zero to the screen
+#Note: Does not loop
 
 from pathlib import Path
 

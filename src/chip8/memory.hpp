@@ -17,7 +17,7 @@ public:
   uint8_t getRegister(uint8_t reg) const;
   void setIndexRegister(uint16_t value);
   uint16_t getIndexRegister();
-  bool loadROM(const std::string &path);
+  void loadROM(const std::string &path);
   void pushToStack(uint16_t address);
   uint16_t top();
 };

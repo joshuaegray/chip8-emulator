@@ -21,6 +21,5 @@ public:
   Keypad& getKeypad();
   bool updateTimers();
 
-  // Instructions
 };
 

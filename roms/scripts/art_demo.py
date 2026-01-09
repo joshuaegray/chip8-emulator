@@ -1,3 +1,5 @@
+# Created by Gemini
+# Draws random symbols to screen
 from pathlib import Path
 
 def create_rom():

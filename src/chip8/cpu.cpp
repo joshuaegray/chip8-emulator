@@ -24,35 +24,6 @@ uint16_t CPU::fetch(Memory& memory){
 }
 
 
-void CPU::loop(Timer& timer, Memory& memory, Display& display, Keypad& keypad){
-    auto lastCpu = std::chrono::steady_clock::now();
-    auto lastClock = std::chrono::steady_clock::now();
-    while (true){
-        auto now = std::chrono::steady_clock::now();
-        auto cpuDt = std::chrono::duration<double>(now-lastCpu).count();
-        auto clockDt = std::chrono::duration<double>(now-lastClock).count();
-
-        while (cpuDt >= chip8::CPU_STEP){
-            cycle(memory, display, keypad, timer);
-            cpuDt -= chip8::CPU_STEP;
-            lastCpu += std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(chip8::CPU_STEP));
-        }
-
-        while (clockDt >= chip8::TIMER_STEP){
-            if (timer.getDelayTimer() > 0){
-                timer.decrementDelayTimer(); 
-            }
-
-            if (timer.getSoundTimer() > 0){
-                timer.decrementSoundTimer();
-            }
-
-            clockDt -= chip8::TIMER_STEP;
-            lastClock += std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(chip8::TIMER_STEP));
-        }        
-
-    }
-}
 
 
 
@@ -356,13 +327,9 @@ void CPU::skipIfNotEqual(uint8_t reg, uint16_t value, Memory& memory){
     }
 
     if (memory.getRegister(reg) != value){
-        std::cout << "SKIPPING" << std::endl;
         pc += 2;
     }
 
-    else{
-        std::cout << "NOT SKIPPING" << std::endl;
-    }
 } 
 
 void CPU::skipIfRegEqual(uint8_t xReg, uint8_t yReg, Memory& memory){
@@ -530,14 +497,12 @@ void CPU::getKey(uint8_t reg, Keypad& keypad, Memory& memory){
     }
     else{
         memory.setRegister(reg, key);
-        std::cout << memory.getRegister(reg) << std::endl;
     }
 
 }
 
 void CPU::fontCharacter(uint8_t reg, Memory& memory){
     uint8_t character = memory.getRegister(reg);
-    std::cout << "FONT CHARACTER: " <<  int(character) << std::endl;
     memory.setIndexRegister(chip8::FONT_START + (5 * character));
 }
 
@@ -566,7 +531,6 @@ void CPU::storeMemory(uint8_t reg, Memory& memory){
 void CPU::loadMemory(uint8_t reg, Memory& memory){
     for (uint8_t i = 0; i <= reg; i ++){
         memory.setRegister(i, memory.readMemory(memory.getIndexRegister()+i));
-        std::cout << "FOUND VALUE: " << std::hex << (int)(memory.getIndexRegister()+i) << std::endl;
     }
 }
 

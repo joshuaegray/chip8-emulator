@@ -11,9 +11,7 @@ namespace chip8{
   static_assert(chip8::FONT_START + 80 <= chip8::MEMORY_SIZE);
 
   static constexpr int CPU_HZ = 700;
-  static constexpr double CPU_STEP = 1.0/CPU_HZ;
   static constexpr int TIMER_HZ = 60;
-  static constexpr double TIMER_STEP = 1.0/TIMER_HZ;
   
 
   static constexpr int SCREEN_WIDTH = 64;

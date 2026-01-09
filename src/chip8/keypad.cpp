@@ -2,7 +2,6 @@
 #include <iostream>
 
 void Keypad::setKey(uint8_t key, bool pressed){
-    std::cout << int(key) << std::endl;
     keys[key] = pressed;
 }
 

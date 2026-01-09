@@ -1,3 +1,6 @@
+#Written by Gemini
+#Tests Timers
+#Should be a beep, then a 1 is drawn
 from pathlib import Path
 
 def create_rom():

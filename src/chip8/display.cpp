@@ -1,5 +1,7 @@
 #include "display.hpp"
 #include <iostream>
+
+//used for debugging/prototyping (Terminal-based GUI)
 void Display::drawScreen(){
     std::cout << "----------------------------" << std::endl;
     for (int i = 0; i < chip8::SCREEN_HEIGHT; i ++){
