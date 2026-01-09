@@ -74,7 +74,7 @@ To compile the emulator
 To run the emulator: `./emulate <path to ROM binary>`
 - Example: `./emulate roms/binaries/demos/art_demo.ch8`
 
-As a platform layer between the CHIP-8 CPU and the OS, the program uses the SDL2 library. The rules to compile the Makefile assume the SDL2 library is located in /opt/homebrew. The emulator was developed and tested on macOS.
+As a platform layer between the CHIP-8 CPU and the OS, the program uses the SDL2 library. The rules to compile the Makefile assume the SDL2 library is located in `/opt/homebrew`. The emulator was developed and tested on macOS.
 
 ---
 
