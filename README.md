@@ -16,6 +16,7 @@ This is my implementation of the legendary processor, written in C++
 - [Binary ROMs and Testing](#binary-roms-and-testing)
 - [File Structure](#file-structure)
 - [Motivation](#motivation)
+- [Acknowledgements](#acknowledgements)
 
 ---
 
@@ -162,3 +163,13 @@ CHIP-8 provided an ideal platform for exploring instruction decoding, timing mod
 Beyond architecture, this project significantly improved my systems programming skills in C++, as well as my debugging discipline and attention to detail, preparing me to develop reliable low-level software.
 
 > *By wisdom a house is built, and through understanding it is established.* \- Proverbs 24:3
+
+---
+
+## Acknowledgements
+
+As a conceptual reference for the CHIP-8 architecture and instruction semantics, the following resource was consulted: 
+- [Guide to Making a CHIP-8 Emulator](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/) by Tobias Langhoff
+
+Some custom test ROMs used for validation were developed with the assistance of Gemini 
+
